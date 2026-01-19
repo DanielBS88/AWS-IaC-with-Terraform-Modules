@@ -26,7 +26,32 @@ resource "aws_launch_template" "main" {
     security_groups             = [var.ssh_sg_id, var.private_http_sg_id]
   }
 
-  user_data = base64encode(templatefile("${path.module}/user_data.sh", {}))
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    exec > /var/log/user-data.log 2>&1
+    set -x
+    
+    yum update -y
+    yum install -y httpd
+    
+    INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+    MACHINE_UUID=$(cat /sys/devices/virtual/dmi/id/product_uuid | tr '[:upper:]' '[:lower:]')
+    
+    cat > /var/www/html/index.html << 'HTML'
+    <!DOCTYPE html>
+    <html>
+    <head><title>Instance Info</title></head>
+    <body><h1>Instance Information</h1>
+    HTML
+    
+    echo "<p>This message was generated on instance $INSTANCE_ID with the following UUID $MACHINE_UUID</p>" >> /var/www/html/index.html
+    
+    echo '</body></html>' >> /var/www/html/index.html
+    
+    systemctl start httpd
+    systemctl enable httpd
+    EOF
+  )
 
   tag_specifications {
     resource_type = "instance"
