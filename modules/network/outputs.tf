@@ -3,21 +3,6 @@ output "vpc_id" {
   value       = aws_vpc.main.id
 }
 
-output "public_subnet_a_id" {
-  description = "ID of public subnet A"
-  value       = aws_subnet.public_a.id
-}
-
-output "public_subnet_b_id" {
-  description = "ID of public subnet B"
-  value       = aws_subnet.public_b.id
-}
-
-output "public_subnet_c_id" {
-  description = "ID of public subnet C"
-  value       = aws_subnet.public_c.id
-}
-
 output "public_subnet_ids" {
   description = "List of public subnet IDs"
   value       = [aws_subnet.public_a.id, aws_subnet.public_b.id, aws_subnet.public_c.id]
